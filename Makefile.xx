@@ -1,0 +1,16 @@
+SRCS = $(wildcard *.cpp)
+OBJS = $(SRCS:.cpp=.o)
+SPUXX_DLL = spuxx.dll
+
+CXX_DEBUG_FLAGS = -g
+CXX_PIC_FLAGS = -fPIC
+CXXFLAGS = $(CXX_DEBUG_FLAGS) $(CXX_PIC_FLAGS) -w -I../cxx1/src -DCXX_GENERATOR
+
+all:$(SPUXX_DLL)
+
+
+$(SPUXX_DLL) : $(OBJS)
+	$(CXX) $(CXX_DEBUG_FLAGS) -shared -o $@ $(OBJS)
+
+clean:
+	$(RM) *.o *~ *.dll *.so
