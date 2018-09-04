@@ -8,25 +8,25 @@
 extern "C" DLL_EXPORT int generator_seed()
 {
 #ifdef _MSC_VER
-	int r = _MSC_VER;
+        int r = _MSC_VER;
 #ifndef CXX_GENERATOR
-	r += 10000000;
+        r += 10000000;
 #else // CXX_GENERATOR
-	r += 20000000;
+        r += 20000000;
 #endif // CXX_GENERATOR
 #ifdef WIN32
-	r += 100000;
+        r += 100000;
 #endif // WIN32
 #endif // _MSC_VER
 #ifdef __GNUC__
-	int r = (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__);
+        int r = (__GNUC__ * 10000 + __GNUC_MINOR__ * 100 + __GNUC_PATCHLEVEL__);
 #ifndef CXX_GENERATOR
-	r += 30000000;
+        r += 30000000;
 #else // CXX_GENERATOR
-	r += 40000000;
+        r += 40000000;
 #endif // CXX_GENERATOR
 #endif // __GNUC__
-	return r;
+        return r;
 }
 
 std::ostream out(std::cout.rdbuf());
@@ -84,9 +84,9 @@ extern "C" DLL_EXPORT int generator_close_file()
     string label = _02031011121380800607141516178080->label();
     out << label << ":\n";
     int pattern[] = { 0x02, 0x03, 0x10, 0x11, 0x12, 0x13, 0x80, 0x80,
-		      0x06, 0x07, 0x14, 0x15, 0x16, 0x17, 0x80, 0x80 };
+                      0x06, 0x07, 0x14, 0x15, 0x16, 0x17, 0x80, 0x80 };
     transform(&pattern[0],&pattern[16],ostream_iterator<string>(out,"\n"),
-	      make_pattern);
+              make_pattern);
   }
   if ( _04050607808080800c0d0e0f80808080.get() ){
     output_section(rom);
@@ -94,9 +94,9 @@ extern "C" DLL_EXPORT int generator_close_file()
     string label = _04050607808080800c0d0e0f80808080->label();
     out << label << ":\n";
     int pattern[] = { 0x04, 0x05, 0x06, 0x07, 0x80, 0x80, 0x80, 0x80,
-		      0x0c, 0x0d, 0x0e, 0x0f, 0x80, 0x80, 0x80, 0x80 };
+                      0x0c, 0x0d, 0x0e, 0x0f, 0x80, 0x80, 0x80, 0x80 };
     transform(&pattern[0],&pattern[16],ostream_iterator<string>(out,"\n"),
-	      make_pattern);
+              make_pattern);
   }
   if ( _80000000000000000000000000000000.get() ){
     output_section(rom);
@@ -104,9 +104,9 @@ extern "C" DLL_EXPORT int generator_close_file()
     string label = _80000000000000000000000000000000->label();
     out << label << ":\n";
     int pattern[] = { 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-		      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
+                      0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 };
     transform(&pattern[0],&pattern[16],ostream_iterator<string>(out,"\n"),
-	      make_pattern);
+              make_pattern);
   }
   if ( _0000043e0000041e0000000000000000.get() ){
     output_section(rom);
@@ -132,9 +132,9 @@ extern "C" DLL_EXPORT int generator_close_file()
     string label = _12121212121212131212121212121212->label();
     out << label << ":\n";
     int pattern[] = { 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x13,
-		      0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12 };
+                      0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12, 0x12 };
     transform(&pattern[0],&pattern[16],ostream_iterator<string>(out,"\n"),
-	      make_pattern);
+              make_pattern);
   }
   if ( _10101010101002031010101010101010.get() ){
     output_section(rom);
@@ -142,9 +142,9 @@ extern "C" DLL_EXPORT int generator_close_file()
     string label = _10101010101002031010101010101010->label();
     out << label << ":\n";
     int pattern[] = { 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x02, 0x03,
-		      0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10 };
+                      0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10, 0x10 };
     transform(&pattern[0],&pattern[16],ostream_iterator<string>(out,"\n"),
-	      make_pattern);
+              make_pattern);
   }
 #ifdef CXX_GENERATOR
   if ( !ctors.empty() ){
@@ -201,34 +201,34 @@ int option_handler(const char* option)
 
 extern "C" DLL_EXPORT void generator_option(int argc, const char** argv, int* error)
 {
-	using namespace std;
-	++argv;
-	--argc;
+        using namespace std;
+        ++argv;
+        --argc;
 #ifdef _MSC_VER
-	const char** p; int* q;
-	for (p = &argv[0], q = &error[0]; p != &argv[argc]; ++p, ++q)
-		*q = option_handler(*p);
+        const char** p; int* q;
+        for (p = &argv[0], q = &error[0]; p != &argv[argc]; ++p, ++q)
+                *q = option_handler(*p);
 #else // _MSC_VER
-	transform(&argv[0],&argv[argc],&error[0],option_handler);
+        transform(&argv[0],&argv[argc],&error[0],option_handler);
 #endif // _MSC_VER
 }
 
 extern "C" DLL_EXPORT int generator_sizeof(const COMPILER::type* T)
 {
-	return T->size();
+        return T->size();
 }
 
 void(*output3ac)(std::ostream&, const COMPILER::tac*);
 
 extern "C" DLL_EXPORT void generator_spell(void* arg)
 {
-	using namespace std;
-	using namespace COMPILER;
-	void* magic[] = {
-		((char **)arg)[0],
-	};
-	int index = 0;
-	memcpy(&output3ac, &magic[index++], sizeof magic[0]);
+        using namespace std;
+        using namespace COMPILER;
+        void* magic[] = {
+                ((char **)arg)[0],
+        };
+        int index = 0;
+        memcpy(&output3ac, &magic[index++], sizeof magic[0]);
 }
 
 std::map<const COMPILER::var*, address*> address_descriptor;
@@ -243,7 +243,7 @@ bool string_literal(const COMPILER::usr* entry)
 
 mem::mem(std::string label, const COMPILER::type* T) : m_label(label)
 {
-	m_size = T->scalar() ? T->size() : -1;
+        m_size = T->scalar() ? T->size() : -1;
 }
 
 mem::mem(std::string label, int size) : m_label(label), m_size(size) {}

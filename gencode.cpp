@@ -7,28 +7,28 @@
 #include "gencode.h"
 
 namespace gencode_impl {
-	const COMPILER::tac* m_last;
+        const COMPILER::tac* m_last;
 }
 
 gencode::gencode(const std::vector<COMPILER::tac*>& v3ac)
   : m_v3ac(v3ac), m_counter(-1)
 {
-	gencode_impl::m_last = v3ac.back();
+        gencode_impl::m_last = v3ac.back();
 }
 
 namespace gencode_impl {
-	bool big_aggregate_stuff;
-	inline bool cmp_id(const COMPILER::tac* ptr, COMPILER::tac::id_t id) { return ptr->id == id; }
-	class copy_big_aggregate_param {
-		int m_cnt;
-	public:
-		copy_big_aggregate_param();
-		void operator()(const COMPILER::tac*);
-	};
-	void prepare_big_aggregate_return(const COMPILER::tac*);
-	struct tac_table : std::map<COMPILER::tac::id_t, void(*)(const COMPILER::tac*)> {
-		tac_table();
-	} m_tac_table;
+        bool big_aggregate_stuff;
+        inline bool cmp_id(const COMPILER::tac* ptr, COMPILER::tac::id_t id) { return ptr->id == id; }
+        class copy_big_aggregate_param {
+                int m_cnt;
+        public:
+                copy_big_aggregate_param();
+                void operator()(const COMPILER::tac*);
+        };
+        void prepare_big_aggregate_return(const COMPILER::tac*);
+        struct tac_table : std::map<COMPILER::tac::id_t, void(*)(const COMPILER::tac*)> {
+                tac_table();
+        } m_tac_table;
 };
 
 void gencode::operator()(const COMPILER::tac* ptr)
@@ -45,12 +45,12 @@ void gencode::operator()(const COMPILER::tac* ptr)
   }
 
   if ( cmp_id(ptr, tac::PARAM) && !big_aggregate_stuff ){
-	  vector<tac*>::const_iterator p =
-		  find_if(m_v3ac.begin()+m_counter,m_v3ac.end(),bind2nd(ptr_fun(cmp_id),tac::CALL));
-	  for_each(m_v3ac.begin()+m_counter,p,copy_big_aggregate_param());
-	  assert(p != m_v3ac.end());
-	  prepare_big_aggregate_return(*p);
-	  big_aggregate_stuff = true;
+          vector<tac*>::const_iterator p =
+                  find_if(m_v3ac.begin()+m_counter,m_v3ac.end(),bind2nd(ptr_fun(cmp_id),tac::CALL));
+          for_each(m_v3ac.begin()+m_counter,p,copy_big_aggregate_param());
+          assert(p != m_v3ac.end());
+          prepare_big_aggregate_return(*p);
+          big_aggregate_stuff = true;
   }
   else if ( cmp_id(ptr,tac::CALL) )
     big_aggregate_stuff = false;
@@ -59,52 +59,52 @@ void gencode::operator()(const COMPILER::tac* ptr)
 }
 
 namespace gencode_impl {
-	address* getaddr(const COMPILER::var*);
+        address* getaddr(const COMPILER::var*);
 }
 
 gencode_impl::copy_big_aggregate_param::copy_big_aggregate_param()
   : m_cnt(-1) {}
 
 namespace gencode_impl {
-	void copy(address* dst, address* src, int size);
+        void copy(address* dst, address* src, int size);
 }
 
 void gencode_impl::copy_big_aggregate_param::operator()(const COMPILER::tac* ptr)
 {
-	using namespace COMPILER;
-	++m_cnt;
-	assert(ptr->id == tac::PARAM);
-	var* entry = ptr->y;
-	const type* T = entry->m_type;
-	int size = T->size();
-	if (size <= 1232 - 16 * m_cnt)
-		return;
-	::stack* dst = big_aggregate_param[entry];
-	address* src = getaddr(entry);
-	copy(dst, src, size);
+        using namespace COMPILER;
+        ++m_cnt;
+        assert(ptr->id == tac::PARAM);
+        var* entry = ptr->y;
+        const type* T = entry->m_type;
+        int size = T->size();
+        if (size <= 1232 - 16 * m_cnt)
+                return;
+        ::stack* dst = big_aggregate_param[entry];
+        address* src = getaddr(entry);
+        copy(dst, src, size);
 }
 
 void gencode_impl::copy(address* dst, address* src, int size)
 {
-	if (dst && src) {
-		reg r3(3);
-		dst->get(r3);
-		reg r4(4);
-		src->get(r4);
-	}
-	else if (dst) {
-		reg r3(3);
-		dst->get(r3);
-	}
-	else if (src) {
-		reg r4(4);
-		src->get(r4);
-	}
-	reg r5(5);
-	out << '\t' << "il" << '\t' << r5 << ',' << size << '\n';
-	out << '\t' << "ai" << '\t' << "$sp,$sp,-32" << '\n';
-	out << '\t' << "brsl" << '\t' << "$lr, memcpy" << '\n';
-	out << '\t' << "ai" << '\t' << "$sp,$sp,32" << '\n';
+        if (dst && src) {
+                reg r3(3);
+                dst->get(r3);
+                reg r4(4);
+                src->get(r4);
+        }
+        else if (dst) {
+                reg r3(3);
+                dst->get(r3);
+        }
+        else if (src) {
+                reg r4(4);
+                src->get(r4);
+        }
+        reg r5(5);
+        out << '\t' << "il" << '\t' << r5 << ',' << size << '\n';
+        out << '\t' << "ai" << '\t' << "$sp,$sp,-32" << '\n';
+        out << '\t' << "brsl" << '\t' << "$lr, memcpy" << '\n';
+        out << '\t' << "ai" << '\t' << "$sp,$sp,32" << '\n';
 }
 
 namespace gencode_impl {
@@ -381,7 +381,7 @@ void gencode_impl::mod(const COMPILER::tac* tac)
 
 namespace gencode_impl {
   void sw_div_mod_notlonglong(const reg&, const reg&, const reg&, const reg&,
-			      bool);
+                              bool);
 }
 
 void gencode_impl::div_mod_notlonglong(const COMPILER::tac* tac, bool div)
@@ -403,10 +403,10 @@ void gencode_impl::div_mod_notlonglong(const COMPILER::tac* tac, bool div)
 }
 
 void gencode_impl::sw_div_mod_notlonglong(const reg& did,
-					  const reg& dis,
-					  const reg& quo,
-					  const reg& rem,
-					  bool is_unsigned)
+                                          const reg& dis,
+                                          const reg& quo,
+                                          const reg& rem,
+                                          bool is_unsigned)
 {
   reg a(10), b(11), c(12), d(13);
   reg e(6), f(9), g(7), h(14), i(8);
@@ -433,7 +433,7 @@ void gencode_impl::sw_div_mod_notlonglong(const reg& did,
   out << '\t' << "ori" << '\t' << rem << ',' << did << ',' << 0 << '\n';
   } else {
   out << '\t' << "shlqbyi"  << '\t' << rem << ',' << a << ',' << 0 << '\n';
-  out << '\t' << "xor" 	    << '\t' << d << ',' << c << ',' << d << '\n';
+  out << '\t' << "xor"             << '\t' << d << ',' << c << ',' << d << '\n';
   }
   out << '\t' << "shl"      << '\t' << g << ',' << g << ',' << f << '\n';
   if (is_unsigned){
@@ -1561,44 +1561,44 @@ void gencode_impl::double_uint16(const COMPILER::tac* tac)
   double_uint(tac,16);
   /*
 .LC0:
-	.byte	2
-	.byte	3
-	.byte	16
-	.byte	17
-	.byte	18
-	.byte	19
-	.byte	-128
-	.byte	-128
-	.byte	6
-	.byte	7
-	.byte	20
-	.byte	21
-	.byte	22
-	.byte	23
-	.byte	-128
-	.byte	-128
+        .byte        2
+        .byte        3
+        .byte        16
+        .byte        17
+        .byte        18
+        .byte        19
+        .byte        -128
+        .byte        -128
+        .byte        6
+        .byte        7
+        .byte        20
+        .byte        21
+        .byte        22
+        .byte        23
+        .byte        -128
+        .byte        -128
 .text
-	.align	3
-	.global	f
-	.type	f, @function
+        .align        3
+        .global        f
+        .type        f, @function
 f:
-				ila	$12,65535
-	hbr	.L2,$lr
-	il	$10,1054
-	lnop
-				and	$11,$3,$12
-	lqa	$3,.LC0
-	clz	$5,$11
-	shl	$9,$11,$5
-	ceqi	$7,$5,32
-	sf	$8,$5,$10
-	a	$6,$9,$9
-	andc	$2,$8,$7
-	shufb	$4,$2,$6,$3
-	shlqbii	$3,$4,4
-	nop	$127
+                                ila        $12,65535
+        hbr        .L2,$lr
+        il        $10,1054
+        lnop
+                                and        $11,$3,$12
+        lqa        $3,.LC0
+        clz        $5,$11
+        shl        $9,$11,$5
+        ceqi        $7,$5,32
+        sf        $8,$5,$10
+        a        $6,$9,$9
+        andc        $2,$8,$7
+        shufb        $4,$2,$6,$3
+        shlqbii        $3,$4,4
+        nop        $127
 .L2:
-	bi	$lr
+        bi        $lr
   */
 }
 
@@ -1633,7 +1633,7 @@ void gencode_impl::double_sint(const COMPILER::tac* tac, int bit)
 
   reg a(14), b(2), c(11), d(13), e(4), f(12), g(10), h(6), i(9), j(5);
   reg k(8), l(7);
-  out << '\t' << "ilhu" << '\t' << a << ',' << 	-32768 << '\n';
+  out << '\t' << "ilhu" << '\t' << a << ',' <<         -32768 << '\n';
   if ( !_02031011121380800607141516178080.get() ){
     const type* T = tac->y->m_type->varg();
     _02031011121380800607141516178080 =
@@ -1753,7 +1753,7 @@ void gencode_impl::double_sint64(const COMPILER::tac* tac)
   reg j(9);
   out << '\t' << "a" << '\t' << j << ',' << g << ',' << g << '\n';
   reg k(5);
-  out << '\t' << "andc"	<< '\t' << k << ',' << i << ',' << h << '\n';
+  out << '\t' << "andc"        << '\t' << k << ',' << i << ',' << h << '\n';
   reg l(4);
   out << '\t' << "shufb" << '\t' << l << ',' << k << ',' << j << ',' << d << '\n';
   reg m(2);
@@ -1854,9 +1854,9 @@ void gencode_impl::extend(const COMPILER::tac* tac, bool signextend, int bit)
       break;
     case 2:
       {
-	reg s(2);
-	out << '\t' << "ila" << '\t' << s << ',' << mask << '\n';
-	out << '\t' << "and" << '\t' << r << ',' << r << ',' << s << '\n';
+        reg s(2);
+        out << '\t' << "ila" << '\t' << s << ',' << mask << '\n';
+        out << '\t' << "and" << '\t' << r << ',' << r << ',' << s << '\n';
       }
       break;
     }
@@ -2040,208 +2040,208 @@ void gencode_impl::prepare_big_aggregate_return(const COMPILER::tac* tac)
 }
 
 namespace gencode_impl {
-	void loff_scalar(const COMPILER::tac*);
-	void loff_aggregate(const COMPILER::tac*);
+        void loff_scalar(const COMPILER::tac*);
+        void loff_aggregate(const COMPILER::tac*);
 }
 
 void gencode_impl::loff(const COMPILER::tac* tac)
 {
-	using namespace COMPILER;
-	const type* T = tac->z->m_type;
-	T->scalar() ? loff_scalar(tac) : loff_aggregate(tac);
+        using namespace COMPILER;
+        const type* T = tac->z->m_type;
+        T->scalar() ? loff_scalar(tac) : loff_aggregate(tac);
 }
 
 namespace gencode_impl {
-	void loff_scalar(const COMPILER::tac*, int delta);
+        void loff_scalar(const COMPILER::tac*, int delta);
 }
 
 void gencode_impl::loff_scalar(const COMPILER::tac* tac)
 {
-	using namespace std;
-	using namespace COMPILER;
-	{
-		var* y = tac->y;
-		if (y->isconstant())
-			return loff_scalar(tac, y->value());
-	}
-	address* x = getaddr(tac->x);
-	address* y = getaddr(tac->y);
-	address* z = getaddr(tac->z);
+        using namespace std;
+        using namespace COMPILER;
+        {
+                var* y = tac->y;
+                if (y->isconstant())
+                        return loff_scalar(tac, y->value());
+        }
+        address* x = getaddr(tac->x);
+        address* y = getaddr(tac->y);
+        address* z = getaddr(tac->z);
 
-	reg r(1); x->get(r);
-	reg a(3); y->load(a);
-	out << '\t' << "a" << '\t' << a << ',' << a << ',' << r << '\n';
-	reg b(4); z->load(b);
-	reg c(6);
-	out << '\t' << "lqd" << '\t' << c << ',' << 0 << '(' << a << ')' << '\n';
-	reg d(5);
-	const type* T = tac->z->m_type;
-	int size = T->size();
-	string op = pattern_operation(size);
-	out << '\t' << op << '\t' << d << ',' << 0 << '(' << a << ')' << '\n';
-	reg e(2);
-	out << '\t' << "shufb" << '\t' << e << ',' << b << ',' << c << ',' << d << '\n';
-	out << '\t' << "stqd" << '\t' << e << ',' << 0 << '(' << a << ')' << '\n';
+        reg r(1); x->get(r);
+        reg a(3); y->load(a);
+        out << '\t' << "a" << '\t' << a << ',' << a << ',' << r << '\n';
+        reg b(4); z->load(b);
+        reg c(6);
+        out << '\t' << "lqd" << '\t' << c << ',' << 0 << '(' << a << ')' << '\n';
+        reg d(5);
+        const type* T = tac->z->m_type;
+        int size = T->size();
+        string op = pattern_operation(size);
+        out << '\t' << op << '\t' << d << ',' << 0 << '(' << a << ')' << '\n';
+        reg e(2);
+        out << '\t' << "shufb" << '\t' << e << ',' << b << ',' << c << ',' << d << '\n';
+        out << '\t' << "stqd" << '\t' << e << ',' << 0 << '(' << a << ')' << '\n';
 }
 
 void gencode_impl::loff_scalar(const COMPILER::tac* tac, int delta)
 {
-	using namespace std;
-	using namespace COMPILER;
-	address* x = getaddr(tac->x);
-	address* z = getaddr(tac->z);
+        using namespace std;
+        using namespace COMPILER;
+        address* x = getaddr(tac->x);
+        address* z = getaddr(tac->z);
 
-	reg a(3); x->get(a);
-	reg b(4); z->load(b);
-	reg c(6);
-	out << '\t' << "lqd" << '\t' << c << ',' << delta << '(' << a << ')' << '\n';
-	reg d(5);
-	const type* T = tac->z->m_type;
-	int size = T->size();
-	string op = pattern_operation(size);
-	out << '\t' << op << '\t' << d << ',' << delta << '(' << a << ')' << '\n';
-	reg e(2);
-	out << '\t' << "shufb" << '\t' << e << ',' << b << ',' << c << ',' << d << '\n';
-	out << '\t' << "stqd" << '\t' << e << ',' << delta << '(' << a << ')' << '\n';
+        reg a(3); x->get(a);
+        reg b(4); z->load(b);
+        reg c(6);
+        out << '\t' << "lqd" << '\t' << c << ',' << delta << '(' << a << ')' << '\n';
+        reg d(5);
+        const type* T = tac->z->m_type;
+        int size = T->size();
+        string op = pattern_operation(size);
+        out << '\t' << op << '\t' << d << ',' << delta << '(' << a << ')' << '\n';
+        reg e(2);
+        out << '\t' << "shufb" << '\t' << e << ',' << b << ',' << c << ',' << d << '\n';
+        out << '\t' << "stqd" << '\t' << e << ',' << delta << '(' << a << ')' << '\n';
 }
 
 namespace gencode_impl {
-	void loff_aggregate(const COMPILER::tac* tac, int delta);
+        void loff_aggregate(const COMPILER::tac* tac, int delta);
 }
 
 void gencode_impl::loff_aggregate(const COMPILER::tac* tac)
 {
-	using namespace std;
-	using namespace COMPILER;
-	{
-		var* y = tac->y;
-		if (y->isconstant())
-			return loff_aggregate(tac, y->value());
-	}
-	address* x = getaddr(tac->y);
-	address* y = getaddr(tac->y);
-	address* z = getaddr(tac->z);
+        using namespace std;
+        using namespace COMPILER;
+        {
+                var* y = tac->y;
+                if (y->isconstant())
+                        return loff_aggregate(tac, y->value());
+        }
+        address* x = getaddr(tac->y);
+        address* y = getaddr(tac->y);
+        address* z = getaddr(tac->z);
 
-	reg xx(6); x->get(xx);
-	reg r3(3); y->load(r3);
-	out << '\t' << "a" << '\t' << r3 << ',' << r3 << ',' << xx << '\n';
-	const type* T = tac->z->m_type;
-	int size = T->size();
-	copy(0, z, size);
+        reg xx(6); x->get(xx);
+        reg r3(3); y->load(r3);
+        out << '\t' << "a" << '\t' << r3 << ',' << r3 << ',' << xx << '\n';
+        const type* T = tac->z->m_type;
+        int size = T->size();
+        copy(0, z, size);
 }
 
 void gencode_impl::loff_aggregate(const COMPILER::tac* tac, int delta)
 {
-	using namespace std;
-	using namespace COMPILER;
-	address* x = getaddr(tac->y);
-	address* z = getaddr(tac->z);
+        using namespace std;
+        using namespace COMPILER;
+        address* x = getaddr(tac->y);
+        address* z = getaddr(tac->z);
 
-	reg r3(3); x->get(r3);
-	out << '\t' << "ai" << '\t' << r3 << ',' << r3 << ',' << delta << '\n';
-	const type* T = tac->z->m_type;
-	int size = T->size();
-	copy(0, z, size);
+        reg r3(3); x->get(r3);
+        out << '\t' << "ai" << '\t' << r3 << ',' << r3 << ',' << delta << '\n';
+        const type* T = tac->z->m_type;
+        int size = T->size();
+        copy(0, z, size);
 }
 
 namespace gencode_impl {
-	void roff_scalar(const COMPILER::tac* tac);
-	void roff_aggregate(const COMPILER::tac* tac);
+        void roff_scalar(const COMPILER::tac* tac);
+        void roff_aggregate(const COMPILER::tac* tac);
 }
 
 void gencode_impl::roff(const COMPILER::tac* tac)
 {
-	using namespace COMPILER;
-	const type* T = tac->x->m_type;
-	T->scalar() ? roff_scalar(tac) : roff_aggregate(tac);
+        using namespace COMPILER;
+        const type* T = tac->x->m_type;
+        T->scalar() ? roff_scalar(tac) : roff_aggregate(tac);
 }
 
 namespace gencode_impl {
-	void roff_scalar(const COMPILER::tac* tac, int delta);
+        void roff_scalar(const COMPILER::tac* tac, int delta);
 }
 
 void gencode_impl::roff_scalar(const COMPILER::tac* tac)
 {
-	using namespace COMPILER;
-	{
-		var* z = tac->z;
-		if (z->isconstant())
-			return roff_scalar(tac, z->value());
-	}
-	address* x = getaddr(tac->x);
-	address* y = getaddr(tac->y);
-	address* z = getaddr(tac->z);
+        using namespace COMPILER;
+        {
+                var* z = tac->z;
+                if (z->isconstant())
+                        return roff_scalar(tac, z->value());
+        }
+        address* x = getaddr(tac->x);
+        address* y = getaddr(tac->y);
+        address* z = getaddr(tac->z);
 
-	reg a(3);
-	y->get(a);
-	reg c(4);
-	z->load(c);
-	out << '\t' << "a" << '\t' << a << ',' << a << ',' << c << '\n';
+        reg a(3);
+        y->get(a);
+        reg c(4);
+        z->load(c);
+        out << '\t' << "a" << '\t' << a << ',' << a << ',' << c << '\n';
 
-	reg b(2);
-	out << '\t' << "lqd" << '\t' << b << ',' << 0 << '(' << a << ')' << '\n';
-	const type* T = tac->x->m_type;
-	int size = T->size();
-	if (int rot = invraddr_helper(size))
-		out << '\t' << "ai" << '\t' << a << ',' << a << ',' << rot << '\n';
-	out << '\t' << "rotqby" << '\t' << a << ',' << b << ',' << a << '\n';
-	x->store(a);
+        reg b(2);
+        out << '\t' << "lqd" << '\t' << b << ',' << 0 << '(' << a << ')' << '\n';
+        const type* T = tac->x->m_type;
+        int size = T->size();
+        if (int rot = invraddr_helper(size))
+                out << '\t' << "ai" << '\t' << a << ',' << a << ',' << rot << '\n';
+        out << '\t' << "rotqby" << '\t' << a << ',' << b << ',' << a << '\n';
+        x->store(a);
 }
 
 void gencode_impl::roff_scalar(const COMPILER::tac* tac, int delta)
 {
-	using namespace COMPILER;
-	address* x = getaddr(tac->x);
-	address* y = getaddr(tac->y);
+        using namespace COMPILER;
+        address* x = getaddr(tac->x);
+        address* y = getaddr(tac->y);
 
-	reg a(3);
-	y->get(a);
+        reg a(3);
+        y->get(a);
 
-	reg b(2);
-	out << '\t' << "lqd" << '\t' << b << ',' << delta << '(' << a << ')' << '\n';
-	const type* T = tac->x->m_type;
-	int size = T->size();
-	if (int rot = invraddr_helper(size))
-		out << '\t' << "ai" << '\t' << a << ',' << a << ',' << rot << '\n';
-	out << '\t' << "rotqby" << '\t' << a << ',' << b << ',' << a << '\n';
-	x->store(a);
+        reg b(2);
+        out << '\t' << "lqd" << '\t' << b << ',' << delta << '(' << a << ')' << '\n';
+        const type* T = tac->x->m_type;
+        int size = T->size();
+        if (int rot = invraddr_helper(size))
+                out << '\t' << "ai" << '\t' << a << ',' << a << ',' << rot << '\n';
+        out << '\t' << "rotqby" << '\t' << a << ',' << b << ',' << a << '\n';
+        x->store(a);
 }
 
 namespace gencode_impl{
-	void roff_aggregate(const COMPILER::tac* tac, int delta);
+        void roff_aggregate(const COMPILER::tac* tac, int delta);
 }
 
 void gencode_impl::roff_aggregate(const COMPILER::tac* tac)
 {
-	using namespace COMPILER;
-	{
-		var* z = tac->z;
-		if (z->isconstant())
-			return roff_aggregate(tac, z->value());
-	}
-	address* x = getaddr(tac->x);
-	address* y = getaddr(tac->y);
-	address* z = getaddr(tac->z);
+        using namespace COMPILER;
+        {
+                var* z = tac->z;
+                if (z->isconstant())
+                        return roff_aggregate(tac, z->value());
+        }
+        address* x = getaddr(tac->x);
+        address* y = getaddr(tac->y);
+        address* z = getaddr(tac->z);
 
-	reg r4(4); y->get(r4);
-	reg tmp(6); z->load(tmp);
-	out << '\t' << "a" << '\t' << r4 << ',' << r4 << ',' << tmp << '\n';
-	const type* T = tac->x->m_type;
-	int size = T->size();
-	copy(x, 0, size);
+        reg r4(4); y->get(r4);
+        reg tmp(6); z->load(tmp);
+        out << '\t' << "a" << '\t' << r4 << ',' << r4 << ',' << tmp << '\n';
+        const type* T = tac->x->m_type;
+        int size = T->size();
+        copy(x, 0, size);
 }
 
 void gencode_impl::roff_aggregate(const COMPILER::tac* tac, int delta)
 {
-	using namespace COMPILER;
-	address* x = getaddr(tac->x);
-	address* y = getaddr(tac->y);
+        using namespace COMPILER;
+        address* x = getaddr(tac->x);
+        address* y = getaddr(tac->y);
 
-	reg r4(4); y->get(r4);
-	out << '\t' << "ai" << '\t' << r4 << ',' << r4 << ',' << delta << '\n';
-	const type* T = tac->x->m_type;
-	int size = T->size();
-	copy(x, 0, size);
+        reg r4(4); y->get(r4);
+        out << '\t' << "ai" << '\t' << r4 << ',' << r4 << ',' << delta << '\n';
+        const type* T = tac->x->m_type;
+        int size = T->size();
+        copy(x, 0, size);
 }
 
 void gencode_impl::param(const COMPILER::tac* tac)
@@ -2366,7 +2366,7 @@ void gencode_impl::_return(const COMPILER::tac* tac)
     int size = T->size();
     if ( size <= 1232 ){
       for ( int i = 0 ; size > 0 ; ++i , size -= 16 )
-	set_return_value(tac,i);
+        set_return_value(tac,i);
     }
     else
       set_return_value(tac);
@@ -2635,14 +2635,14 @@ void gencode_impl::_goto(const COMPILER::tac* tac)
 {
   const goto3ac* ptr = static_cast<const goto3ac*>(tac);
   if (ptr->m_op == goto3ac::NONE)
-	  out << '\t' << "br" << '\t' << '.' << func_label << ptr->m_to << '\n';
+          out << '\t' << "br" << '\t' << '.' << func_label << ptr->m_to << '\n';
   else
-	  ifgoto(tac);
+          ifgoto(tac);
 }
 
 void gencode_impl::to(const COMPILER::tac* tac)
 {
-	out << '.' << func_label << tac << ":\n";
+        out << '.' << func_label << tac << ":\n";
 }
 
 void gencode_impl::alloc(const COMPILER::tac* tac)
@@ -2668,7 +2668,7 @@ void gencode_impl::alloc(const COMPILER::tac* tac)
 
 void gencode_impl::dealloc(const COMPILER::tac* tac)
 {
-	// Nothing to be done
+        // Nothing to be done
 }
 
 void gencode_impl::asm_(const COMPILER::tac* tac)
@@ -2715,7 +2715,7 @@ void gencode_impl::_va_arg(const COMPILER::tac* tac)
 
 void gencode_impl::_va_end(const COMPILER::tac*)
 {
-	// Nothing to be done
+        // Nothing to be done
 }
 
 address* gencode_impl::getaddr(const COMPILER::var* entry)

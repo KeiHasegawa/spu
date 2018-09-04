@@ -9,22 +9,22 @@ void output_data(const std::pair<std::string, std::vector<COMPILER::usr*> >&);
 
 void genobj(const COMPILER::scope* tree)
 {
-	using namespace std;
-	using namespace COMPILER;
-	const map<string, vector<usr*> >& usrs = tree->m_usrs;
-	for_each(usrs.begin(), usrs.end(), output_data);
-	const vector<scope*>& children = tree->m_children;
-	for_each(children.begin(), children.end(), genobj);
+        using namespace std;
+        using namespace COMPILER;
+        const map<string, vector<usr*> >& usrs = tree->m_usrs;
+        for_each(usrs.begin(), usrs.end(), output_data);
+        const vector<scope*>& children = tree->m_children;
+        for_each(children.begin(), children.end(), genobj);
 }
 
 void output_data2(COMPILER::usr*);
 
 void output_data(const std::pair<std::string, std::vector<COMPILER::usr*> >& x)
 {
-	using namespace std;
-	using namespace COMPILER;
-	const vector<usr*>& vec = x.second;
-	for_each(vec.begin(), vec.end(), output_data2);
+        using namespace std;
+        using namespace COMPILER;
+        const vector<usr*>& vec = x.second;
+        for_each(vec.begin(), vec.end(), output_data2);
 }
 
 void constant_data(COMPILER::usr* entry);
@@ -37,63 +37,63 @@ int static_counter;
 
 void output_data2(COMPILER::usr* entry)
 {
-	using namespace std;
-	using namespace COMPILER;
+        using namespace std;
+        using namespace COMPILER;
 
-	map<const var*, address*>::const_iterator p = address_descriptor.find(entry);
-	if (p != address_descriptor.end())
-		return;
+        map<const var*, address*>::const_iterator p = address_descriptor.find(entry);
+        if (p != address_descriptor.end())
+                return;
 
-	usr::flag flag = entry->m_flag;
-	usr::flag mask = usr::flag(usr::TYPEDEF|usr::ENUM_MEMBER);
-	if (flag & mask)
-		return;
+        usr::flag flag = entry->m_flag;
+        usr::flag mask = usr::flag(usr::TYPEDEF|usr::ENUM_MEMBER);
+        if (flag & mask)
+                return;
 
-	string label = entry->m_name;
-	const type* T = entry->m_type;
-	usr::flag mask2 = usr::flag(usr::EXTERN|usr::FUNCTION);
-	if (flag & mask2) {
-		address_descriptor[entry] = new mem(label,T);
-		return;
-	}
+        string label = entry->m_name;
+        const type* T = entry->m_type;
+        usr::flag mask2 = usr::flag(usr::EXTERN|usr::FUNCTION);
+        if (flag & mask2) {
+                address_descriptor[entry] = new mem(label,T);
+                return;
+        }
 
-	if (entry->isconstant())
-		return constant_data(entry);
+        if (entry->isconstant())
+                return constant_data(entry);
 
-	if (string_literal(entry))
-		return string_literal_data(entry);
+        if (string_literal(entry))
+                return string_literal_data(entry);
 
-	if (!is_top(entry->m_scope) && !(flag & usr::STATIC))
-		return;
+        if (!is_top(entry->m_scope) && !(flag & usr::STATIC))
+                return;
 
-	output_section(T->modifiable() ? ram : rom);
+        output_section(T->modifiable() ? ram : rom);
 
-	if (flag & usr::STATIC) {
-		if (!is_top(entry->m_scope)) {
-			ostringstream os;
-			os << '.' << ++static_counter;
-			label += os.str();
-		}
-	}
-	else
-		out << '\t' << ".global" << '\t' << label << '\n';
+        if (flag & usr::STATIC) {
+                if (!is_top(entry->m_scope)) {
+                        ostringstream os;
+                        os << '.' << ++static_counter;
+                        label += os.str();
+                }
+        }
+        else
+                out << '\t' << ".global" << '\t' << label << '\n';
 
-	out << '\t' << ".align" << '\t' << T->align() << '\n';
+        out << '\t' << ".align" << '\t' << T->align() << '\n';
 
-	int size = T->size();
+        int size = T->size();
 
-	if (flag & usr::WITH_INI) {
-		with_initial* wi = static_cast<with_initial*>(entry);
-		map<int, var*>& value = wi->m_value;
-		if (int n = size - accumulate(value.begin(),value.end(),0,initial))
-			out << '\t' << ".space" << n << '\n';
-	}
-	else {
-		int n = size < 16 ? 16 : size + 16;
-		out << '\t' << ".comm" << '\t' << label << ", " << n << " # " << size << '\n';
-	}
+        if (flag & usr::WITH_INI) {
+                with_initial* wi = static_cast<with_initial*>(entry);
+                map<int, var*>& value = wi->m_value;
+                if (int n = size - accumulate(value.begin(),value.end(),0,initial))
+                        out << '\t' << ".space" << n << '\n';
+        }
+        else {
+                int n = size < 16 ? 16 : size + 16;
+                out << '\t' << ".comm" << '\t' << label << ", " << n << " # " << size << '\n';
+        }
 
-	address_descriptor[entry] = new mem(label, T);
+        address_descriptor[entry] = new mem(label, T);
 }
 
 void constant_data(COMPILER::usr* entry)
@@ -106,7 +106,7 @@ void constant_data(COMPILER::usr* entry)
     out << '\t' << ".align" << '\t' << T->align() << '\n';
     string label = new_label();
     out << label << ":\n";
-	pair<int, var*> tmp(0, entry);
+        pair<int, var*> tmp(0, entry);
     initial(0,tmp);
     address_descriptor[entry] = new mem(label,T);
   }
@@ -137,8 +137,8 @@ int initial(int offset, std::pair<int, COMPILER::var*> x)
   using namespace COMPILER;
   int specified = x.first;
   if (int n = specified - offset) {
-	  out << '\n' << ".space" << '\t' << n << '\n';
-	  offset = specified;
+          out << '\n' << ".space" << '\t' << n << '\n';
+          offset = specified;
   }
   
   var* v = x.second;
@@ -167,15 +167,15 @@ int initial_notreal(int offset, COMPILER::usr* entry)
 
   switch ( size ){
   case 1:
-	  out << '\t' << ".byte" << '\t' << name << '\n';
-	  return offset + size;
+          out << '\t' << ".byte" << '\t' << name << '\n';
+          return offset + size;
   case 2:
-	  out << '\t' << ".short" << '\t' << name << '\n';
-	  return offset + size;
+          out << '\t' << ".short" << '\t' << name << '\n';
+          return offset + size;
   case 4:
     {
-	  out << '\t' << ".long" << '\t' << name << '\n';
-	  return offset + size;
+          out << '\t' << ".long" << '\t' << name << '\n';
+          return offset + size;
     }
   }
 
@@ -195,30 +195,30 @@ int initial_notreal(int offset, COMPILER::usr* entry)
 
 int initial_real(int offset, COMPILER::usr* entry)
 {
-	using namespace std;
-	using namespace COMPILER;
-	const type* T = entry->m_type;
-	int size = T->size();
+        using namespace std;
+        using namespace COMPILER;
+        const type* T = entry->m_type;
+        int size = T->size();
 
-	if ( size == 4 ){
-		union {
-			float f;
-			int i;
-		} tmp = { (float)atof(entry->m_name.c_str()) };
-		out << '\t' << ".long" << '\t' << tmp.i << '\n';
-	}
-	else {
-		union {
-			double d;
-			int i[2];
-		} tmp = { atof(entry->m_name.c_str()) };
-		int i = 1;
-		if (*(char*)&i)
-			swap(tmp.i[0], tmp.i[1]);
-		out << '\t' << ".long" << '\t' << tmp.i[0] << '\n';
-		out << '\t' << ".long" << '\t' << tmp.i[1] << '\n';
-	}
-	return offset + size;
+        if ( size == 4 ){
+                union {
+                        float f;
+                        int i;
+                } tmp = { (float)atof(entry->m_name.c_str()) };
+                out << '\t' << ".long" << '\t' << tmp.i << '\n';
+        }
+        else {
+                union {
+                        double d;
+                        int i[2];
+                } tmp = { atof(entry->m_name.c_str()) };
+                int i = 1;
+                if (*(char*)&i)
+                        swap(tmp.i[0], tmp.i[1]);
+                out << '\t' << ".long" << '\t' << tmp.i[0] << '\n';
+                out << '\t' << ".long" << '\t' << tmp.i[1] << '\n';
+        }
+        return offset + size;
 }
 
 #ifdef CXX_GENERATOR
