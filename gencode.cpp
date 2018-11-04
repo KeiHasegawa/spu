@@ -17,18 +17,21 @@ gencode::gencode(const std::vector<COMPILER::tac*>& v3ac)
 }
 
 namespace gencode_impl {
-        bool big_aggregate_stuff;
-        inline bool cmp_id(const COMPILER::tac* ptr, COMPILER::tac::id_t id) { return ptr->id == id; }
-        class copy_big_aggregate_param {
-                int m_cnt;
-        public:
-                copy_big_aggregate_param();
-                void operator()(const COMPILER::tac*);
-        };
-        void prepare_big_aggregate_return(const COMPILER::tac*);
-        struct tac_table : std::map<COMPILER::tac::id_t, void(*)(const COMPILER::tac*)> {
-                tac_table();
-        } m_tac_table;
+  bool big_aggregate_stuff;
+  inline bool cmp_id(const COMPILER::tac* ptr, COMPILER::tac::id_t id)
+  {
+    return ptr->m_id == id;
+  }
+  class copy_big_aggregate_param {
+    int m_cnt;
+  public:
+    copy_big_aggregate_param();
+    void operator()(const COMPILER::tac*);
+  };
+  void prepare_big_aggregate_return(const COMPILER::tac*);
+  struct tac_table : std::map<COMPILER::tac::id_t, void(*)(const COMPILER::tac*)> {
+    tac_table();
+  } m_tac_table;
 };
 
 void gencode::operator()(const COMPILER::tac* ptr)
@@ -55,7 +58,7 @@ void gencode::operator()(const COMPILER::tac* ptr)
   else if ( cmp_id(ptr,tac::CALL) )
     big_aggregate_stuff = false;
 
-  m_tac_table[ptr->id](ptr);
+  m_tac_table[ptr->m_id](ptr);
 }
 
 namespace gencode_impl {
@@ -71,40 +74,40 @@ namespace gencode_impl {
 
 void gencode_impl::copy_big_aggregate_param::operator()(const COMPILER::tac* ptr)
 {
-        using namespace COMPILER;
-        ++m_cnt;
-        assert(ptr->id == tac::PARAM);
-        var* entry = ptr->y;
-        const type* T = entry->m_type;
-        int size = T->size();
-        if (size <= 1232 - 16 * m_cnt)
-                return;
-        ::stack* dst = big_aggregate_param[entry];
-        address* src = getaddr(entry);
-        copy(dst, src, size);
+  using namespace COMPILER;
+  ++m_cnt;
+  assert(ptr->m_id == tac::PARAM);
+  var* entry = ptr->y;
+  const type* T = entry->m_type;
+  int size = T->size();
+  if (size <= 1232 - 16 * m_cnt)
+    return;
+  ::stack* dst = big_aggregate_param[entry];
+  address* src = getaddr(entry);
+  copy(dst, src, size);
 }
 
 void gencode_impl::copy(address* dst, address* src, int size)
 {
-        if (dst && src) {
-                reg r3(3);
-                dst->get(r3);
-                reg r4(4);
-                src->get(r4);
-        }
-        else if (dst) {
-                reg r3(3);
-                dst->get(r3);
-        }
-        else if (src) {
-                reg r4(4);
-                src->get(r4);
-        }
-        reg r5(5);
-        out << '\t' << "il" << '\t' << r5 << ',' << size << '\n';
-        out << '\t' << "ai" << '\t' << "$sp,$sp,-32" << '\n';
-        out << '\t' << "brsl" << '\t' << "$lr, memcpy" << '\n';
-        out << '\t' << "ai" << '\t' << "$sp,$sp,32" << '\n';
+  if (dst && src) {
+    reg r3(3);
+    dst->get(r3);
+    reg r4(4);
+    src->get(r4);
+  }
+  else if (dst) {
+    reg r3(3);
+    dst->get(r3);
+  }
+  else if (src) {
+    reg r4(4);
+    src->get(r4);
+  }
+  reg r5(5);
+  out << '\t' << "il" << '\t' << r5 << ',' << size << '\n';
+  out << '\t' << "ai" << '\t' << "$sp,$sp,-32" << '\n';
+  out << '\t' << "brsl" << '\t' << "$lr, memcpy" << '\n';
+  out << '\t' << "ai" << '\t' << "$sp,$sp,32" << '\n';
 }
 
 namespace gencode_impl {

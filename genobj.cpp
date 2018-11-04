@@ -44,14 +44,14 @@ void output_data2(COMPILER::usr* entry)
   if (p != address_descriptor.end())
     return;
 
-  usr::flag flag = entry->m_flag;
-  usr::flag mask = usr::flag(usr::TYPEDEF|usr::ENUM_MEMBER);
+  usr::flag_t flag = entry->m_flag;
+  usr::flag_t mask = usr::flag_t(usr::TYPEDEF|usr::ENUM_MEMBER);
   if (flag & mask)
     return;
 
   string label = entry->m_name;
   const type* T = entry->m_type;
-  usr::flag mask2 = usr::flag(usr::EXTERN|usr::FUNCTION);
+  usr::flag_t mask2 = usr::flag_t(usr::EXTERN|usr::FUNCTION);
   if (flag & mask2) {
     address_descriptor[entry] = new mem(label,T);
     return;

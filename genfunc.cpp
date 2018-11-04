@@ -17,7 +17,7 @@ void genfunc(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>& v3
   using namespace COMPILER;
   output_section(rom);
   const usr* entry = func->m_usr;
-  usr::flag flag = entry->m_flag;
+  usr::flag_t flag = entry->m_flag;
   func_label = entry->m_name;
 #ifdef CXX_GENERATOR
   func_label = scope_name(entry->m_scope);
@@ -200,25 +200,28 @@ int fun_arg(const std::vector<COMPILER::tac*>& v3ac)
   return accumulate(v3ac.begin(),v3ac.end(),n,param_space_big_aggregate());
 }
 
-inline bool cmp_id(const COMPILER::tac* ptr, COMPILER::tac::id_t id) { return ptr->id == id; }
+inline bool cmp_id(const COMPILER::tac* ptr, COMPILER::tac::id_t id)
+{
+  return ptr->m_id == id;
+}
 
 void arg_count::operator()(const COMPILER::tac* ptr)
 {
-        using namespace std;
-        using namespace COMPILER;
+  using namespace std;
+  using namespace COMPILER;
 
-        if (cmp_id(ptr, tac::PARAM)) {
-                var* y = ptr->y;
-                const type* T = y->m_type;
-                T = T->promotion();
-                int size = T->size();
-                size = align(size, 16);
-                m_curr += size;
-        }
-        else if (cmp_id(ptr,tac::CALL)) {
-                *m_res = max(*m_res, m_curr);
-                m_curr = 0;
-        }
+  if (cmp_id(ptr, tac::PARAM)) {
+    var* y = ptr->y;
+    const type* T = y->m_type;
+    T = T->promotion();
+    int size = T->size();
+    size = align(size, 16);
+    m_curr += size;
+  }
+  else if (cmp_id(ptr,tac::CALL)) {
+    *m_res = max(*m_res, m_curr);
+    m_curr = 0;
+  }
 }
 
 param_space_big_aggregate::param_space_big_aggregate() : m_cnt(-1) {}
@@ -298,8 +301,8 @@ int recursive_locvar::add2(int offset, const COMPILER::usr* entry)
 {
         using namespace std;
         using namespace COMPILER;
-        usr::flag flag = entry->m_flag;
-        usr::flag mask = usr::flag(usr::STATIC|usr::EXTERN|usr::FUNCTION);
+        usr::flag_t flag = entry->m_flag;
+        usr::flag_t mask = usr::flag_t(usr::STATIC|usr::EXTERN|usr::FUNCTION);
         if (flag & mask)
                 return offset;
 
