@@ -18,13 +18,13 @@ extern std::string func_label;
 extern void genfunc(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>& vc);
 
 struct reg {
-        int m_no;
-        reg(int no) : m_no(no) {}
+  int m_no;
+  reg(int no) : m_no(no) {}
 };
 
 inline std::ostream& operator<<(std::ostream& os, const reg& r)
 {
-        return os << '$' << r.m_no;
+  return os << '$' << r.m_no;
 }
 
 class address {

@@ -136,8 +136,7 @@ namespace gencode_impl {
   void ifgoto(const COMPILER::tac*);
   void _goto(const COMPILER::tac*);
   void to(const COMPILER::tac*);
-  void alloc(const COMPILER::tac*);
-  void dealloc(const COMPILER::tac*);
+  void alloca_(const COMPILER::tac*);
   void asm_(const COMPILER::tac*);
   void _va_start(const COMPILER::tac*);
   void _va_arg(const COMPILER::tac*);
@@ -171,8 +170,7 @@ gencode_impl::tac_table::tac_table()
   (*this)[tac::RETURN] = _return;
   (*this)[tac::GOTO] = _goto;
   (*this)[tac::TO] = to;
-  (*this)[tac::ALLOC] = alloc;
-  (*this)[tac::DEALLOC] = dealloc;
+  (*this)[tac::ALLOCA] = alloca_;
   (*this)[tac::ASM] = asm_;
   (*this)[tac::VASTART] = _va_start;
   (*this)[tac::VAARG] = _va_arg;
@@ -2648,7 +2646,7 @@ void gencode_impl::to(const COMPILER::tac* tac)
         out << '.' << func_label << tac << ":\n";
 }
 
-void gencode_impl::alloc(const COMPILER::tac* tac)
+void gencode_impl::alloca_(const COMPILER::tac* tac)
 {
   reg a(3);
   out << '\t' << "lqd" << '\t' << a << ',' << "0($sp)" << '\n';
@@ -2667,11 +2665,6 @@ void gencode_impl::alloc(const COMPILER::tac* tac)
   address* x = getaddr(tac->x);
   alloced_addr* p = dynamic_cast<alloced_addr*>(x);
   p->set(a);
-}
-
-void gencode_impl::dealloc(const COMPILER::tac* tac)
-{
-        // Nothing to be done
 }
 
 void gencode_impl::asm_(const COMPILER::tac* tac)
