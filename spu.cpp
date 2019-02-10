@@ -1,7 +1,9 @@
 #include "stdafx.h"
+#ifdef CXX_GENERATOR
+#include "cxx_core.h"
+#else // CXX_GENERATOR
 #include "c_core.h"
-
-#define COMPILER c_compiler
+#endif // CXX_GENERATOR
 
 #include "spu.h"
 
@@ -417,12 +419,17 @@ void imm::load(const reg& r, int delta) const
 struct function_exit function_exit;
 
 #ifdef CXX_GENERATOR
-std::string scope_name(symbol_tree* scope)
+std::string scope_name(COMPILER::scope* ptr)
 {
-  if ( tag* T = dynamic_cast<tag*>(scope) )
-    return scope_name(scope->m_parent) + func_name(T->name());
-  if ( _namespace* nmsp = dynamic_cast<_namespace*>(scope) )
-    return nmsp->name();
+  using namespace COMPILER;
+  if (ptr->m_id == scope::TAG) {
+    tag* T = static_cast<tag*>(ptr);
+    return scope_name(ptr->m_parent) + func_name(T->m_name);
+  }
+  if (ptr->m_id == scope::NAMESPACE) {
+    name_space* nmsp = static_cast<name_space*>(ptr);
+    return nmsp->m_name;
+  }
   return "";
 }
 
@@ -465,14 +472,18 @@ std::string func_name(std::string name)
   return res;
 }
 
-std::string signature(const type_expr* type)
+std::string signature(const COMPILER::type* T)
 {
-#ifdef _MSC_VER
-  use_ostream_magic obj;
-#endif // _MSC_VER
-  std::ostringstream os;
-  type->encode(os);
-  return func_name(os.str());
+  using namespace std;
+  using namespace COMPILER;
+  ostringstream os;
+  assert(T->m_id == type::FUNC);
+  typedef const func_type FT;
+  FT* ft = static_cast<FT*>(T);
+  const vector<const type*>& param = ft->param();
+  for (auto T : param)
+    T->encode(os);
+  return os.str();
 }
 #endif // CXX_GENERATOR
 
@@ -581,3 +592,8 @@ std::auto_ptr<mem> _10101010101002031010101010101010;
 std::map<const COMPILER::var*, stack*> big_aggregate_param;
 
 bool has_allocatable;
+
+#ifdef CXX_GENERATOR
+std::vector<std::string> ctors;
+std::string dtor_name;
+#endif // CXX_GENERATOR

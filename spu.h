@@ -7,6 +7,12 @@
 #define DLL_EXPORT
 #endif // defined(_MSC_VER) || defined(__CYGWIN__)
 
+#ifdef CXX_GENERATOR
+#define COMPILER cxx_compiler
+#else // CXX_GENERATOR
+#define COMPILER c_compiler
+#endif // CXX_GENERATOR
+
 extern std::ostream out;
 
 extern void(*output3ac)(std::ostream&, const COMPILER::tac*);
@@ -141,5 +147,14 @@ public:
 extern bool has_allocatable;
 extern void enter_helper(int);
 extern void leave_helper(int);
+
+#ifdef CXX_GENERATOR
+extern std::string scope_name(COMPILER::scope*);
+extern std::string func_name(std::string);
+extern std::string signature(const COMPILER::type*);
+
+extern std::vector<std::string> ctors;
+extern std::string dtor_name;
+#endif // CXX_GENERATOR
 
 #endif // _SPU_H_

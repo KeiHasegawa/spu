@@ -1,7 +1,10 @@
 #include "stdafx.h"
-#include "c_core.h"
 
-#define COMPILER c_compiler
+#ifdef CXX_GENERATOR
+#include "cxx_core.h"
+#else // CXX_GENERATOR
+#include "c_core.h"
+#endif // CXX_GENERATOR
 
 #include "spu.h"
 #include "gencode.h"
@@ -22,8 +25,8 @@ void genfunc(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>& v3
 #ifdef CXX_GENERATOR
   func_label = scope_name(entry->m_scope);
   func_label += func_name(entry->m_name);
-  if ( !entry->m_csymbol )
-          func_label += signature(entry->m_type);
+  if (!(flag & usr::C_SYMBOL))
+    func_label += signature(entry->m_type);
 #endif // CXX_GENERATOR
   if ( flag & usr::STATIC)
     out << '\t' << ".global" << '\t' << func_label << '\n';
@@ -35,12 +38,6 @@ void genfunc(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>& v3
   if ( !v3ac.empty() )
     for_each(v3ac.begin(),v3ac.end(),gencode(v3ac));
   leave();
-#ifdef CXX_GENERATOR
-  switch ( func->m_initialize_or_destruct ){
-  case _initialize: ctors.push_back(name); break;
-  case _destruct: dtor_name = name; break;
-  }
-#endif // CXX_GENERATOR
 }
 
 int sched_stack(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>&);
@@ -67,11 +64,12 @@ void enter_helper(int n)
   shift_sp(-n);
 }
 
-void enter(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>& v3ac)
+void enter(const COMPILER::fundef* func,
+           const std::vector<COMPILER::tac*>& v3ac)
 {
-        using namespace std;
-        using namespace COMPILER;
-        if ( debug_flag )
+  using namespace std;
+  using namespace COMPILER;
+  if ( debug_flag )
     out << '\t' << "/* enter */" << '\n';
 
   has_allocatable = false;
@@ -81,6 +79,10 @@ void enter(const COMPILER::fundef* func, const std::vector<COMPILER::tac*>& v3ac
   enter_helper(n);
   if ( has_allocatable )
     out << '\t' << "ori" << '\t' << "$127,$sp,0" << '\n';
+
+#ifdef CXX_GENERATOR
+  typedef scope param_scope;
+#endif // CXX_GENERATOR
   param_scope* param = func->m_param;
   const vector<usr*>& vec = param->m_order;
   for_each(vec.begin(),vec.end(),save_param());
@@ -149,9 +151,6 @@ void leave()
 
   clear_address_descriptor();
   clear_big_aggregate_param();
-#ifdef CXX_GENERATOR
-  anonymous_table.clear();
-#endif // CXX_GENERATOR
 }
 
 int fun_arg(const std::vector<COMPILER::tac*>&);
@@ -260,6 +259,9 @@ int local_variable(const COMPILER::fundef* func, int n)
 {
   using namespace std;
   using namespace COMPILER;
+#ifdef CXX_GENERATOR
+  typedef scope param_scope;
+#endif // CXX_GENERATOR
   const param_scope* param = func->m_param;
   assert(param->m_children.size() == 1);
   scope* tree = param->m_children[0];
